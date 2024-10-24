@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar Aluno</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e0e7ff; /* Azul claro */
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff; /* Branco */
+            padding: 30px;
+            border-radius: 12px; /* Cantos mais arredondados */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #4f46e5; /* Roxo */
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #1e3a8a; /* Azul escuro */
+        }
+        input[type="text"],
+        input[type="number"],
+        input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #a5b4fc; /* Azul claro */
+            border-radius: 6px;
+            transition: border-color 0.3s;
+            font-size: 16px;
+        }
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="date"]:focus {
+            border-color: #6366f1; /* Roxo escuro */
+            outline: none;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #6d28d9; /* Roxo */
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            font-weight: bold;
+            margin-bottom: 10px; /* Espaço entre botões */
+        }
+        button:hover {
+            background-color: #5b21b6; /* Roxo mais escuro */
+        }
+        .message {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .student-list {
+            margin-top: 30px;
+        }
+        .student {
+            padding: 15px;
+            border: 1px solid #a5b4fc; /* Azul claro */
+            border-radius: 6px;
+            margin-bottom: 10px;
+            background-color: #f0f9ff; /* Azul muito claro */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+        .student:hover {
+            background-color: #e0f2fe; /* Azul claro mais escuro */
+        }
+        .day-section {
+            margin-top: 20px;
+            border-top: 3px solid #6d28d9; /* Roxo */
+            padding-top: 10px;
+            margin-bottom: 15px;
+        }
+        .day-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #6d28d9; /* Roxo */
+            font-size: 18px;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            h2 {
+                font-size: 20px;
+            }
+            input[type="text"],
+            input[type="number"],
+            input[type="date"],
+            button {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Adicionar Aluno</h1>
+        <form id="alunoForm">
+            <label for="name">Nome:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="year">Ano:</label>
+            <input type="number" id="year" name="year" required>
+
+            <label for="classYear">Turma:</label>
+            <input type="text" id="classYear" name="classYear" required>
+
+            <button type="submit">Adicionar Aluno</button>
+        </form>
+        <div class="message" id="message"></div>
+
+        <div class="student-list" id="studentList"></div>
+
+        <div class="attendance-section">
+            <h2>Chamada</h2>
+            <label for="attendanceDate">Data:</label>
+            <input type="date" id="attendanceDate" required>
+            <button id="markAttendanceButton">Marcar Presença</button>
+            <div class="message" id="attendanceMessage"></div>
+            <div id="attendanceList"></div>
+        </div>
+    </div>
+
+    <script>
+        const students = []
+
+        const updateStudentList = () => {
+            const studentListDiv = document.getElementById('studentList');
+            studentListDiv.innerHTML = '';
+            students.forEach(student => {
+                const studentDiv = document.createElement('div');
+                studentDiv.className = 'student';
+                studentDiv.innerHTML = `
+                    <span>${student.name} - Ano: ${student.year} - Turma: ${student.classYear}</span>
+                    <div>
+                        <button onclick="editStudent(${student.id})">Editar</button>
+                        <button onclick="deleteStudent(${student.id})">Deletar</button>
+                        <label>
+                            <input type="checkbox" class="attendanceCheckbox" data-id="${student.id}">
+                            Presente
+                        </label>
+                    </div>
+                `;
+                studentListDiv.appendChild(studentDiv);
+            });
+        }
+
+        document.getElementById('alunoForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            console.log('Formulário enviado.');
+
+            // Pegar os dados do formulário
+            const name = document.getElementById('name').value;
+            const year = document.getElementById('year').value;
+            const classYear = document.getElementById('classYear').value;
+
+            console.log('Dados do aluno:', { name, year, classYear });
+
+            try {
+                // Adiciona o aluno à lista local
+                const studentId = students.length + 1; // Simula um ID para o aluno
+                students.push({ id: studentId, name, year, classYear });
+                updateStudentList(); // Atualiza a lista de alunos
+                
+                // Mostrar mensagem de sucesso
+                const messageDiv = document.getElementById('message');
+                messageDiv.innerHTML = '<p style="color: green;">Aluno adicionado com sucesso!</p>';
+                console.log('Aluno adicionado com sucesso.');
+
+                // Limpar o formulário
+                document.getElementById('alunoForm').reset();
+
+            } catch (error) {
+                console.error('Erro ao adicionar aluno:', error);
+                const messageDiv = document.getElementById('message');
+                messageDiv.innerHTML = '<p style="color: red;">Erro ao adicionar aluno. Tente novamente.</p>';
+            }
+        });
+
+        function editStudent(id) {
+            const student = students.find(s => s.id === id);
+            if (student) {
+                document.getElementById('name').value = student.name;
+                document.getElementById('year').value = student.year;
+                document.getElementById('classYear').value = student.classYear;
+
+                // Remove o aluno da lista para atualização
+                deleteStudent(id);
+            }
+        }
+
+        function deleteStudent(id) {
+            const studentIndex = students.findIndex(s => s.id === id);
+            if (studentIndex > -1) {
+                students.splice(studentIndex, 1);
+                updateStudentList();
+                console.log(`Aluno com ID ${id} deletado.`);
+                document.getElementById('message').innerHTML = '<p style="color: red;">Aluno deletado com sucesso!</p>';
+            }
+        }
+
+        document.getElementById('markAttendanceButton').addEventListener('click', () => {
+            const date = document.getElementById('attendanceDate').value;
+            const attendanceListDiv = document.getElementById('attendanceList');
+
+            if (!date) {
+                alert('Por favor, selecione uma data para marcar presença.');
+                return;
+            }
+
+            const attendanceDiv = document.createElement('div');
+            attendanceDiv.className = 'day-section';
+            attendanceDiv.innerHTML = `
+                <div class="day-title">Chamada - ${new Date(date).toLocaleDateString()}</div>
+            `;
+            students.forEach(student => {
+                const checkbox = document.querySelector(`.attendanceCheckbox[data-id="${student.id}"]`);
+                const isChecked = checkbox ? checkbox.checked : false;
+                attendanceDiv.innerHTML += `
+                    <div class="student">
+                        <span>${student.name} - Presente: ${isChecked ? 'Sim' : 'Não'}</span>
+                    </div>
+                `;
+            });
+            attendanceListDiv.appendChild(attendanceDiv);
+            document.getElementById('attendanceMessage').innerHTML = '<p style="color: green;">Presença marcada com sucesso!</p>';
+        });
+    </script>
+</body>
+</html>
